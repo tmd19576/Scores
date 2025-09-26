@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Score Tracker</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="Score Tracker">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Score Tracker">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#4cc9f0">
+    
+    <!-- Simple favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234cc9f0'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='40' font-weight='bold' text-anchor='middle' fill='white'%3E123%3C/text%3E%3C/svg%3E">
+    
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%234cc9f0'/%3E%3Ccircle cx='90' cy='90' r='65' fill='white' opacity='0.2'/%3E%3Ctext x='90' y='110' font-family='Arial' font-size='60' font-weight='bold' text-anchor='middle' fill='white'%3E123%3C/text%3E%3C/svg%3E">
+    <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --bg-secondary: rgba(30, 30, 46, 0.95);
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #4cc9f0;
+            --accent-color-2: #4361ee;
+            --button-bg: linear-gradient(to right, #4361ee, #4cc9f0);
+            --button-hover: rgba(76, 201, 240, 0.1);
+            --card-bg: #252545;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --nav-btn-bg: rgba(76, 201, 240, 0.1);
+            --success-color: #06D6A0;
+            --warning-color: #FFD166;
+        }
+
+        .light-mode {
+            --bg-primary: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --accent-color: #2575fc;
+            --accent-color-2: #6a11cb;
+            --button-bg: linear-gradient(to right, #6a11cb, #2575fc);
+            --button-hover: rgba(37, 117, 252, 0.1);
+            --card-bg: white;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --nav-btn-bg: rgba(37, 117, 252, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--bg-secondary);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+            color: var(--text-primary);
+        }
+        
+        .page {
+            padding: 30px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-height: 600px;
+        }
+        
+        .active {
+            display: flex;
+        }
+        
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Start Page Styles */
+        #start-page {
+            justify-content: center;
+        }
+        
+        .input-group {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .btn {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(37, 117, 252, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 117, 252, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to right, #ff9a00, #ff6b00);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #06D6A0, #118AB2);
+        }
+        
+        /* Main Page Styles */
+        #main-page {
+            justify-content: flex-start;
+            padding-bottom: 120px; /* Make room for navigation */
+        }
+        
+        .session-header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .session-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .session-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 40px; /* More space from navigation */
+        }
+        
+        .player-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .player-name {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bottom-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 15px;
+            width: 200px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: var(--nav-btn-bg);
+            color: var(--accent-color);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(76, 201, 240, 0.2);
+        }
+        
+        .nav-btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sessions Page Styles */
+        #sessions-page {
+            justify-content: flex-start;
+        }
+
+        .sessions-list {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .session-item {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .session-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .session-item.active-session {
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.3);
+        }
+
+        .session-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .session-details {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .session-players-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .player-preview {
+            background: var(--nav-btn-bg);
+            color: var(--accent-color);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .session-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .small-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 20px;
+        }
+
+        .new-session-form {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Game History Page */
+        #game-history-page {
+            justify-content: flex-start;
+        }
+
+        .game-history-list {
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 20px;
+        }
+
+        .game-history-item {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        .game-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .game-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .final-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .final-score {
+            background: var(--nav-btn-bg);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .final-score-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .final-score-value {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* Options Page Styles */
+        #options-page {
+            justify-content: flex-start;
+        }
+        
+        .options-list {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .option-item {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .option-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--accent-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: var(--nav-btn-bg);
+            color: var(--accent-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: var(--button-hover);
+        }
+        
+        /* History Page Styles */
+        #history-page {
+            justify-content: flex-start;
+        }
+        
+        .history-list {
+            width: 100%;
+            max-width: 600px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .history-item {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .player-history {
+            font-weight: 600;
+        }
+        
+        .score-change {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        /* Players Page Styles */
+        #players-page {
+            justify-content: flex-start;
+        }
+        
+        .players-list {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        
+        .player-item {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: var(--nav-btn-bg);
+            color: var(--accent-color);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .color-picker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .add-player-form {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        
+        .add-player-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        /* Score Edit Page Styles */
+        #score-edit-page {
+            justify-content: center;
+        }
+        
+        .score-equation {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .score-equation span {
+            color: var(--text-primary);
+        }
+        
+        .score-circle-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin-bottom: 30px;
+        }
+        
+        .score-circle-large {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            cursor: pointer;
+        }
+        
+        .score-circle-touch-area {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .score-change-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color-2);
+        }
+        
+        /* Color picker modal */
+        .color-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .color-modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .color-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .players-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .score-circle-large {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .score-circle-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .bottom-nav {
+                width: 160px;
+                bottom: 15px;
+                right: 15px;
+                gap: 10px;
+            }
+
+            .nav-btn {
+                padding: 10px 8px;
+                font-size: 11px;
+            }
+            
+            .color-options {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .score-equation {
+                font-size: 20px;
+            }
+
+            .final-scores {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .session-controls {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            #main-page {
+                padding-bottom: 100px; /* Less padding on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Start Page -->
+        <div id="start-page" class="page active">
+            <h1>Player Score Tracker</h1>
+            <div class="input-group">
+                <label for="session-name">Session Name (optional):</label>
+                <input type="text" id="session-name" placeholder="e.g., Friday Game Night">
+            </div>
+            <div class="input-group">
+                <label for="player-names">Enter player names (separated by commas):</label>
+                <input type="text" id="player-names" placeholder="e.g., Alice, Bob, Charlie">
+            </div>
+            <button id="start-btn" class="btn">Start New Session</button>
+            <br><br>
+            <button id="load-session-btn" class="btn btn-success">Load Existing Session</button>
+        </div>
+        
+        <!-- Sessions Management Page -->
+        <div id="sessions-page" class="page">
+            <button class="back-btn" id="sessions-back-btn">Back</button>
+            <h2>Game Sessions</h2>
+            <div class="new-session-form">
+                <h3 style="margin-bottom: 15px;">Create New Session</h3>
+                <div class="input-group">
+                    <input type="text" id="new-session-name" placeholder="Session name">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="new-session-players" placeholder="Player names (comma separated)">
+                </div>
+                <button id="create-session-btn" class="btn">Create Session</button>
+            </div>
+            <div class="sessions-list" id="sessions-container">
+                <!-- Session items will be generated here -->
+            </div>
+        </div>
+
+        <!-- Game History Page -->
+        <div id="game-history-page" class="page">
+            <button class="back-btn" id="game-history-back-btn">Back</button>
+            <h2>Game History</h2>
+            <div class="game-history-list" id="game-history-container">
+                <!-- Game history items will be generated here -->
+            </div>
+            <button id="clear-history-btn" class="btn btn-warning">Clear All History</button>
+        </div>
+        
+        <!-- Main Page -->
+        <div id="main-page" class="page">
+            <div class="session-header" id="session-header">
+                <div class="session-name" id="current-session-name">Current Session</div>
+                <div class="session-info" id="current-session-info">Started today</div>
+            </div>
+            <div class="players-grid" id="players-container">
+                <!-- Player cards will be generated here -->
+            </div>
+            <div class="bottom-nav">
+                <button id="sessions-nav-btn" class="nav-btn">Sessions</button>
+                <button id="options-btn" class="nav-btn">Options</button>
+                <button id="players-btn" class="nav-btn">Players</button>
+                <button id="history-btn" class="nav-btn">History</button>
+            </div>
+        </div>
+        
+        <!-- Options Page -->
+        <div id="options-page" class="page">
+            <button class="back-btn" id="options-back-btn">Back</button>
+            <h2>Options</h2>
+            <div class="options-list">
+                <div class="option-item">
+                    <div class="option-title">End Current Session</div>
+                    <button id="end-session-btn" class="btn btn-success">End & Save Session</button>
+                </div>
+                <div class="option-item">
+                    <div class="option-title">Reset Current Session</div>
+                    <button id="reset-session-btn" class="btn btn-warning">Reset Session Scores</button>
+                </div>
+                <div class="option-item">
+                    <div class="option-title">Delete Current Session</div>
+                    <button id="delete-session-btn" class="btn btn-danger">Delete Session</button>
+                </div>
+                <div class="option-item">
+                    <div class="option-title">Sensitivity</div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="100" value="10" class="slider" id="sensitivity-slider">
+                        <span class="slider-value" id="sensitivity-value">10</span>
+                    </div>
+                </div>
+                <div class="option-item">
+                    <div class="toggle-container">
+                        <div class="option-title">Light Mode</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="theme-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Page -->
+        <div id="history-page" class="page">
+            <button class="back-btn" id="history-back-btn">Back</button>
+            <h2>Current Session History</h2>
+            <div class="history-list" id="history-container">
+                <!-- History items will be generated here -->
+            </div>
+        </div>
+        
+        <!-- Players Page -->
+        <div id="players-page" class="page">
+            <button class="back-btn" id="players-back-btn">Back</button>
+            <h2>Manage Players</h2>
+            <div class="add-player-form">
+                <input type="text" id="new-player-name" class="add-player-input" placeholder="New player name">
+                <button id="add-player-btn" class="btn">Add</button>
+            </div>
+            <div class="players-list" id="players-list-container">
+                <!-- Player list items will be generated here -->
+            </div>
+            <div class="action-buttons">
+                <button id="randomize-btn" class="btn">Randomize Order</button>
+            </div>
+        </div>
+        
+        <!-- Score Edit Page -->
+        <div id="score-edit-page" class="page">
+            <h2 id="editing-player">Editing Score for Player</h2>
+            <div class="score-equation" id="score-equation">
+                <span id="current-score">0</span> + <span id="change-amount">0</span> = <span id="new-score">0</span>
+            </div>
+            <div class="score-circle-container">
+                <div class="score-circle-touch-area" id="score-circle-touch"></div>
+                <div class="score-circle-large" id="score-circle">
+                    <div class="score-change-display" id="score-change-display">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div class="color-modal" id="color-modal">
+        <div class="color-modal-content">
+            <h3>Choose Player Color</h3>
+            <div class="color-options" id="color-options">
+                <!-- Color options will be generated here -->
+            </div>
+            <button id="color-cancel-btn" class="btn" style="background: #666; margin-right: 10px;">Cancel</button>
+            <button id="color-confirm-btn" class="btn">Confirm</button>
+        </div>
+    </div>
+
+    <script>
+        // Default distinct colors for players
+        const defaultColors = [
+            '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', 
+            '#118AB2', '#073B4C', '#7209B7', '#F72585',
+            '#3A86FF', '#FB5607', '#8338EC', '#FF006E'
+        ];
+        
+        // Application state
+        const state = {
+            currentSessionId: null,
+            sessions: {},
+            gameHistory: [],
+            globalSettings: {
+                sensitivity: 10,
+                darkMode: true
+            },
+            // Current editing state
+            currentPlayerIndex: -1,
+            colorModalPlayerIndex: -1,
+            currentPlayerColor: '#4cc9f0',
+            originalScore: 0,
+            cumulativeChange: 0,
+            startCumulativeChange: 0
+        };
+
+        // DOM elements
+        const pages = {
+            start: document.getElementById('start-page'),
+            main: document.getElementById('main-page'),
+            sessions: document.getElementById('sessions-page'),
+            gameHistory: document.getElementById('game-history-page'),
+            options: document.getElementById('options-page'),
+            history: document.getElementById('history-page'),
+            players: document.getElementById('players-page'),
+            scoreEdit: document.getElementById('score-edit-page')
+        };
+
+        // Utility functions
+        function generateId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'Today';
+            if (diffDays === 2) return 'Yesterday';
+            if (diffDays <= 7) return `${diffDays - 1} days ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        // Navigation functions
+        function showPage(pageId) {
+            Object.values(pages).forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            pages[pageId].classList.add('active');
+            
+            if (pageId === 'main') {
+                renderMainPage();
+            } else if (pageId === 'sessions') {
+                renderSessionsList();
+            } else if (pageId === 'gameHistory') {
+                renderGameHistory();
+            }
+        }
+
+        // Session management functions
+        function createNewSession(name, playerNames) {
+            const sessionId = generateId();
+            const session = {
+                id: sessionId,
+                name: name || 'Untitled Session',
+                players: playerNames.map((name, index) => ({
+                    name,
+                    score: 0,
+                    color: defaultColors[index % defaultColors.length]
+                })),
+                history: [],
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            state.sessions[sessionId] = session;
+            state.currentSessionId = sessionId;
+            saveState();
+            return sessionId;
+        }
+
+        function getCurrentSession() {
+            return state.currentSessionId ? state.sessions[state.currentSessionId] : null;
+        }
+
+        function endCurrentSession() {
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            // Add to game history
+            const gameRecord = {
+                id: generateId(),
+                sessionName: session.name,
+                players: session.players.map(p => ({ name: p.name, score: p.score, color: p.color })),
+                endedAt: new Date().toISOString(),
+                createdAt: session.createdAt
+            };
+            
+            state.gameHistory.push(gameRecord);
+            
+            // Remove from active sessions
+            delete state.sessions[state.currentSessionId];
+            state.currentSessionId = null;
+            
+            saveState();
+        }
+
+        function deleteCurrentSession() {
+            if (state.currentSessionId) {
+                delete state.sessions[state.currentSessionId];
+                state.currentSessionId = null;
+                saveState();
+            }
+        }
+
+        // Initialize the app
+        function initApp() {
+            loadState();
+            
+            applyTheme();
+            
+            // Update UI elements with loaded state
+            document.getElementById('sensitivity-slider').value = state.globalSettings.sensitivity;
+            document.getElementById('sensitivity-value').textContent = state.globalSettings.sensitivity;
+            document.getElementById('theme-toggle').checked = !state.globalSettings.darkMode;
+            
+            // Determine which page to show
+            if (state.currentSessionId && state.sessions[state.currentSessionId]) {
+                showPage('main');
+            } else {
+                showPage('start');
+            }
+            
+            setupEventListeners();
+        }
+
+        // Apply theme based on darkMode setting
+        function applyTheme() {
+            if (state.globalSettings.darkMode) {
+                document.body.classList.remove('light-mode');
+            } else {
+                document.body.classList.add('light-mode');
+            }
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Start page
+            document.getElementById('start-btn').addEventListener('click', handleStart);
+            document.getElementById('load-session-btn').addEventListener('click', () => showPage('sessions'));
+            
+            // Main page navigation
+            document.getElementById('sessions-nav-btn').addEventListener('click', () => showPage('sessions'));
+            document.getElementById('options-btn').addEventListener('click', () => showPage('options'));
+            document.getElementById('history-btn').addEventListener('click', () => {
+                renderHistory();
+                showPage('history');
+            });
+            document.getElementById('players-btn').addEventListener('click', () => {
+                renderPlayersList();
+                showPage('players');
+            });
+            
+            // Sessions page
+            document.getElementById('sessions-back-btn').addEventListener('click', () => {
+                if (state.currentSessionId) {
+                    showPage('main');
+                } else {
+                    showPage('start');
+                }
+            });
+            document.getElementById('create-session-btn').addEventListener('click', handleCreateNewSession);
+            
+            // Game history page
+            document.getElementById('game-history-back-btn').addEventListener('click', () => showPage('sessions'));
+            document.getElementById('clear-history-btn').addEventListener('click', handleClearHistory);
+            
+            // Options page
+            document.getElementById('options-back-btn').addEventListener('click', () => showPage('main'));
+            document.getElementById('end-session-btn').addEventListener('click', handleEndSession);
+            document.getElementById('reset-session-btn').addEventListener('click', handleResetSession);
+            document.getElementById('delete-session-btn').addEventListener('click', handleDeleteSession);
+            document.getElementById('sensitivity-slider').addEventListener('input', handleSensitivityChange);
+            document.getElementById('theme-toggle').addEventListener('change', handleThemeToggle);
+            
+            // History page
+            document.getElementById('history-back-btn').addEventListener('click', () => showPage('main'));
+            
+            // Players page
+            document.getElementById('players-back-btn').addEventListener('click', () => showPage('main'));
+            document.getElementById('add-player-btn').addEventListener('click', handleAddPlayer);
+            document.getElementById('randomize-btn').addEventListener('click', handleRandomizePlayers);
+            
+            // Color modal
+            document.getElementById('color-cancel-btn').addEventListener('click', closeColorModal);
+            document.getElementById('color-confirm-btn').addEventListener('click', confirmColorChange);
+            
+            setupScoreCircle();
+        }
+
+        // Handle start button click (create new session from start page)
+        function handleStart() {
+            const sessionName = document.getElementById('session-name').value.trim();
+            const namesInput = document.getElementById('player-names').value.trim();
+            
+            if (!namesInput) {
+                alert('Please enter player names');
+                return;
+            }
+            
+            const names = namesInput.split(',').map(name => name.trim()).filter(name => name);
+            if (names.length === 0) {
+                alert('Please enter valid player names');
+                return;
+            }
+            
+            createNewSession(sessionName, names);
+            showPage('main');
+            
+            // Clear form
+            document.getElementById('session-name').value = '';
+            document.getElementById('player-names').value = '';
+        }
+
+        // Handle creating new session from sessions page
+        function handleCreateNewSession() {
+            const sessionName = document.getElementById('new-session-name').value.trim();
+            const playersInput = document.getElementById('new-session-players').value.trim();
+            
+            if (!playersInput) {
+                alert('Please enter player names');
+                return;
+            }
+            
+            const names = playersInput.split(',').map(name => name.trim()).filter(name => name);
+            if (names.length === 0) {
+                alert('Please enter valid player names');
+                return;
+            }
+            
+            createNewSession(sessionName, names);
+            showPage('main');
+            
+            // Clear form
+            document.getElementById('new-session-name').value = '';
+            document.getElementById('new-session-players').value = '';
+        }
+
+        // Render the main page with current session
+        function renderMainPage() {
+            const session = getCurrentSession();
+            if (!session) {
+                showPage('start');
+                return;
+            }
+            
+            // Update session header
+            document.getElementById('current-session-name').textContent = session.name;
+            document.getElementById('current-session-info').textContent = 
+                `${session.players.length} players • Started ${formatDate(session.createdAt)}`;
+            
+            // Render players
+            const container = document.getElementById('players-container');
+            container.innerHTML = '';
+            
+            session.players.forEach((player, index) => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="score-circle" style="background: ${player.color}">${player.score}</div>
+                `;
+                playerCard.addEventListener('click', () => {
+                    state.currentPlayerIndex = index;
+                    state.currentPlayerColor = player.color;
+                    state.originalScore = player.score;
+                    state.cumulativeChange = 0;
+                    state.startCumulativeChange = 0;
+                    
+                    document.getElementById('editing-player').textContent = `Editing Score for ${player.name}`;
+                    updateScoreEquation();
+                    
+                    const scoreCircle = document.getElementById('score-circle');
+                    scoreCircle.style.background = player.color;
+                    
+                    showPage('scoreEdit');
+                });
+                
+                container.appendChild(playerCard);
+            });
+        }
+
+        // Render sessions list
+        function renderSessionsList() {
+            const container = document.getElementById('sessions-container');
+            container.innerHTML = '';
+            
+            const sessionIds = Object.keys(state.sessions);
+            
+            if (sessionIds.length === 0) {
+                container.innerHTML = '<div class="session-item">No active sessions. Create one above!</div>';
+                return;
+            }
+            
+            sessionIds.forEach(sessionId => {
+                const session = state.sessions[sessionId];
+                const isCurrentSession = sessionId === state.currentSessionId;
+                
+                const sessionItem = document.createElement('div');
+                sessionItem.className = `session-item ${isCurrentSession ? 'active-session' : ''}`;
+                
+                const playersPreviews = session.players.map(p => 
+                    `<span class="player-preview">${p.name}: ${p.score}</span>`
+                ).join('');
+                
+                sessionItem.innerHTML = `
+                    <div class="session-title">${session.name}</div>
+                    <div class="session-details">${session.players.length} players • ${formatDate(session.lastModified)}</div>
+                    <div class="session-players-preview">${playersPreviews}</div>
+                    <div class="session-controls">
+                        <button class="btn small-btn load-session" data-session-id="${sessionId}">
+                            ${isCurrentSession ? 'Current' : 'Load'}
+                        </button>
+                        <button class="btn btn-success small-btn end-session" data-session-id="${sessionId}">End Game</button>
+                        <button class="btn btn-danger small-btn delete-session" data-session-id="${sessionId}">Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(sessionItem);
+            });
+            
+            // Add event listeners for session controls
+            document.querySelectorAll('.load-session').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const sessionId = e.target.getAttribute('data-session-id');
+                    if (sessionId !== state.currentSessionId) {
+                        state.currentSessionId = sessionId;
+                        saveState();
+                    }
+                    showPage('main');
+                });
+            });
+            
+            document.querySelectorAll('.end-session').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const sessionId = e.target.getAttribute('data-session-id');
+                    const session = state.sessions[sessionId];
+                    
+                    if (confirm(`End "${session.name}" and move it to game history?`)) {
+                        // If this is the current session, handle it specially
+                        const wasCurrentSession = sessionId === state.currentSessionId;
+                        
+                        // Add to game history
+                        const gameRecord = {
+                            id: generateId(),
+                            sessionName: session.name,
+                            players: session.players.map(p => ({ name: p.name, score: p.score, color: p.color })),
+                            endedAt: new Date().toISOString(),
+                            createdAt: session.createdAt
+                        };
+                        
+                        state.gameHistory.push(gameRecord);
+                        delete state.sessions[sessionId];
+                        
+                        if (wasCurrentSession) {
+                            state.currentSessionId = null;
+                        }
+                        
+                        saveState();
+                        renderSessionsList();
+                        
+                        if (wasCurrentSession && Object.keys(state.sessions).length === 0) {
+                            showPage('start');
+                        }
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-session').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const sessionId = e.target.getAttribute('data-session-id');
+                    const session = state.sessions[sessionId];
+                    
+                    if (confirm(`Delete "${session.name}" permanently? This cannot be undone.`)) {
+                        const wasCurrentSession = sessionId === state.currentSessionId;
+                        delete state.sessions[sessionId];
+                        
+                        if (wasCurrentSession) {
+                            state.currentSessionId = null;
+                        }
+                        
+                        saveState();
+                        renderSessionsList();
+                        
+                        if (wasCurrentSession && Object.keys(state.sessions).length === 0) {
+                            showPage('start');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Render game history
+        function renderGameHistory() {
+            const container = document.getElementById('game-history-container');
+            container.innerHTML = '';
+            
+            if (state.gameHistory.length === 0) {
+                container.innerHTML = '<div class="game-history-item">No completed games yet.</div>';
+                return;
+            }
+            
+            // Show most recent first
+            const sortedHistory = [...state.gameHistory].reverse();
+            
+            sortedHistory.forEach(game => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'game-history-item';
+                
+                const finalScores = game.players.map(p => 
+                    `<div class="final-score">
+                        <div class="final-score-name">${p.name}</div>
+                        <div class="final-score-value">${p.score}</div>
+                    </div>`
+                ).join('');
+                
+                historyItem.innerHTML = `
+                    <div class="game-header">
+                        <div class="game-title">${game.sessionName}</div>
+                        <div class="game-date">${formatDate(game.endedAt)}</div>
+                    </div>
+                    <div class="final-scores">${finalScores}</div>
+                `;
+                
+                container.appendChild(historyItem);
+            });
+        }
+
+        // Update the score equation display
+        function updateScoreEquation() {
+            const session = getCurrentSession();
+            if (!session || state.currentPlayerIndex < 0) return;
+            
+            const player = session.players[state.currentPlayerIndex];
+            const currentScore = state.originalScore;
+            const changeAmount = state.cumulativeChange;
+            const newScore = currentScore + changeAmount;
+            
+            document.getElementById('current-score').textContent = currentScore;
+            
+            const changeDisplay = changeAmount >= 0 ? changeAmount.toString() : changeAmount.toString();
+            document.getElementById('change-amount').textContent = changeDisplay;
+            
+            document.getElementById('new-score').textContent = newScore;
+            
+            const circleDisplay = changeAmount > 0 ? `+${changeAmount}` : changeAmount.toString();
+            document.getElementById('score-change-display').textContent = circleDisplay;
+        }
+
+        // Render history for current session
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+            
+            const session = getCurrentSession();
+            if (!session || session.history.length === 0) {
+                container.innerHTML = '<div class="history-item">No history for this session yet</div>';
+                return;
+            }
+            
+            const recentHistory = session.history.slice(-20).reverse();
+            
+            recentHistory.forEach(entry => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="player-history">${entry.player}</div>
+                    <div class="score-change">${entry.change > 0 ? '+' : ''}${entry.change} (${entry.newScore})</div>
+                `;
+                container.appendChild(historyItem);
+            });
+        }
+
+        // Render players list for current session
+        function renderPlayersList() {
+            const container = document.getElementById('players-list-container');
+            container.innerHTML = '';
+            
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            session.players.forEach((player, index) => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                playerItem.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-controls">
+                        <button class="control-btn move-up" data-index="${index}">↑</button>
+                        <button class="control-btn move-down" data-index="${index}">↓</button>
+                        <div class="color-picker" style="background: ${player.color}" data-index="${index}"></div>
+                        <button class="control-btn remove-player" data-index="${index}">×</button>
+                    </div>
+                `;
+                container.appendChild(playerItem);
+            });
+            
+            // Add event listeners for player controls
+            document.querySelectorAll('.move-up').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    const session = getCurrentSession();
+                    if (session && index > 0) {
+                        [session.players[index-1], session.players[index]] = [session.players[index], session.players[index-1]];
+                        session.lastModified = new Date().toISOString();
+                        saveState();
+                        renderPlayersList();
+                        renderMainPage();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.move-down').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    const session = getCurrentSession();
+                    if (session && index < session.players.length - 1) {
+                        [session.players[index], session.players[index+1]] = [session.players[index+1], session.players[index]];
+                        session.lastModified = new Date().toISOString();
+                        saveState();
+                        renderPlayersList();
+                        renderMainPage();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.color-picker').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    openColorModal(index);
+                });
+            });
+            
+            document.querySelectorAll('.remove-player').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    const session = getCurrentSession();
+                    if (session) {
+                        if (confirm(`Remove ${session.players[index].name} from this session?`)) {
+                            session.players.splice(index, 1);
+                            session.lastModified = new Date().toISOString();
+                            saveState();
+                            renderPlayersList();
+                            renderMainPage();
+                            
+                            if (session.players.length === 0) {
+                                if (confirm('No players left in session. Delete this session?')) {
+                                    deleteCurrentSession();
+                                    showPage('start');
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Handle options page actions
+        function handleEndSession() {
+            if (confirm('End current session and move it to game history?')) {
+                endCurrentSession();
+                showPage('start');
+            }
+        }
+
+        function handleResetSession() {
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            if (confirm('Reset all scores in current session to zero? This cannot be undone.')) {
+                session.players.forEach(player => {
+                    player.score = 0;
+                });
+                session.history = [];
+                session.lastModified = new Date().toISOString();
+                saveState();
+                renderMainPage();
+                alert('Session scores have been reset to zero.');
+            }
+        }
+
+        function handleDeleteSession() {
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            if (confirm(`Delete "${session.name}" permanently? This cannot be undone.`)) {
+                deleteCurrentSession();
+                showPage('start');
+            }
+        }
+
+        function handleClearHistory() {
+            if (confirm('Clear all game history? This cannot be undone.')) {
+                state.gameHistory = [];
+                saveState();
+                renderGameHistory();
+            }
+        }
+
+        // Handle adding a new player to current session
+        function handleAddPlayer() {
+            const nameInput = document.getElementById('new-player-name');
+            const name = nameInput.value.trim();
+            
+            if (!name) return;
+            
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            let newColor;
+            const usedColors = session.players.map(p => p.color);
+            for (const color of defaultColors) {
+                if (!usedColors.includes(color)) {
+                    newColor = color;
+                    break;
+                }
+            }
+            
+            if (!newColor) newColor = defaultColors[0];
+            
+            session.players.push({
+                name,
+                score: 0,
+                color: newColor
+            });
+            
+            session.lastModified = new Date().toISOString();
+            nameInput.value = '';
+            saveState();
+            renderPlayersList();
+            renderMainPage();
+        }
+
+        // Handle randomizing player order
+        function handleRandomizePlayers() {
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            for (let i = session.players.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [session.players[i], session.players[j]] = [session.players[j], session.players[i]];
+            }
+            
+            session.lastModified = new Date().toISOString();
+            saveState();
+            renderPlayersList();
+            renderMainPage();
+        }
+
+        // Color modal functions
+        function openColorModal(playerIndex) {
+            state.colorModalPlayerIndex = playerIndex;
+            const session = getCurrentSession();
+            if (!session) return;
+            
+            const player = session.players[playerIndex];
+            
+            const colorOptionsContainer = document.getElementById('color-options');
+            colorOptionsContainer.innerHTML = '';
+            
+            defaultColors.forEach(color => {
+                const colorOption = document.createElement('div');
+                colorOption.className = 'color-option';
+                colorOption.style.background = color;
+                colorOption.setAttribute('data-color', color);
+                
+                if (color === player.color) {
+                    colorOption.classList.add('selected');
+                }
+                
+                colorOption.addEventListener('click', () => {
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    colorOption.classList.add('selected');
+                });
+                
+                colorOptionsContainer.appendChild(colorOption);
+            });
+            
+            document.getElementById('color-modal').style.display = 'flex';
+        }
+
+        function closeColorModal() {
+            document.getElementById('color-modal').style.display = 'none';
+            state.colorModalPlayerIndex = -1;
+        }
+
+        function confirmColorChange() {
+            if (state.colorModalPlayerIndex >= 0) {
+                const selectedOption = document.querySelector('.color-option.selected');
+                if (!selectedOption) return;
+                
+                const selectedColor = selectedOption.getAttribute('data-color');
+                const session = getCurrentSession();
+                if (session && session.players[state.colorModalPlayerIndex]) {
+                    session.players[state.colorModalPlayerIndex].color = selectedColor;
+                    session.lastModified = new Date().toISOString();
+                    saveState();
+                    renderPlayersList();
+                    renderMainPage();
+                    closeColorModal();
+                }
+            }
+        }
+
+        // Handle sensitivity and theme changes
+        function handleSensitivityChange(e) {
+            state.globalSettings.sensitivity = parseInt(e.target.value);
+            document.getElementById('sensitivity-value').textContent = state.globalSettings.sensitivity;
+            saveState();
+        }
+
+        function handleThemeToggle(e) {
+            state.globalSettings.darkMode = !e.target.checked;
+            applyTheme();
+            saveState();
+        }
+
+        // Set up score circle interaction
+        function setupScoreCircle() {
+            const touchArea = document.getElementById('score-circle-touch');
+            const circle = document.getElementById('score-circle');
+            let isDragging = false;
+            let startAngle = 0;
+            let currentAngle = 0;
+            let totalRotation = 0;
+            let touchStartTime = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            touchArea.addEventListener('mousedown', startDrag);
+            touchArea.addEventListener('touchstart', startDrag);
+            circle.addEventListener('mousedown', startDrag);
+            circle.addEventListener('touchstart', startDrag);
+            
+            circle.addEventListener('click', handleTap);
+            
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                touchStartTime = Date.now();
+                
+                touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                touchStartY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                const rect = touchArea.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                startAngle = Math.atan2(touchStartY - centerY, touchStartX - centerX);
+                currentAngle = startAngle;
+                totalRotation = 0;
+                state.startCumulativeChange = state.cumulativeChange;
+                
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                const rect = touchArea.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                
+                const angle = Math.atan2(clientY - centerY, clientX - centerX);
+                let angleDiff = angle - currentAngle;
+                
+                // Normalize angle difference
+                if (angleDiff > Math.PI) {
+                    angleDiff -= 2 * Math.PI;
+                } else if (angleDiff < -Math.PI) {
+                    angleDiff += 2 * Math.PI;
+                }
+                
+                totalRotation += angleDiff;
+                currentAngle = angle;
+                
+                // Calculate score change based on rotation and sensitivity
+                const sessionChange = Math.round(totalRotation / (2 * Math.PI) * state.globalSettings.sensitivity);
+                
+                // Update cumulative change
+                state.cumulativeChange = state.startCumulativeChange + sessionChange;
+                
+                // Update displays
+                updateScoreEquation();
+            }
+            
+            function stopDrag(e) {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                const touchDuration = Date.now() - touchStartTime;
+                
+                const endX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX;
+                const endY = e.type === 'touchend' ? e.changedTouches[0].clientY : e.clientY;
+                
+                const distance = Math.sqrt(Math.pow(endX - touchStartX, 2) + Math.pow(endY - touchStartY, 2));
+                
+                if (touchDuration < 300 && distance < 10) {
+                    handleTap();
+                }
+                
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+            
+            function handleTap() {
+                if (state.cumulativeChange !== 0 && state.currentPlayerIndex >= 0) {
+                    applyScoreChange(state.cumulativeChange);
+                }
+                showPage('main');
+            }
+            
+            function applyScoreChange(change) {
+                const session = getCurrentSession();
+                if (!session || state.currentPlayerIndex < 0) return;
+                
+                const player = session.players[state.currentPlayerIndex];
+                const oldScore = player.score;
+                player.score = state.originalScore + change;
+                
+                session.history.push({
+                    player: player.name,
+                    change: change,
+                    oldScore: oldScore,
+                    newScore: player.score,
+                    timestamp: new Date().toISOString()
+                });
+                
+                if (session.history.length > 100) {
+                    session.history = session.history.slice(-100);
+                }
+                
+                session.lastModified = new Date().toISOString();
+                saveState();
+                
+                state.cumulativeChange = 0;
+                state.startCumulativeChange = 0;
+            }
+        }
+
+        // Save state to browser storage
+        function saveState() {
+            const stateData = {
+                currentSessionId: state.currentSessionId,
+                sessions: state.sessions,
+                gameHistory: state.gameHistory,
+                globalSettings: state.globalSettings
+            };
+            
+            const stateString = JSON.stringify(stateData);
+            localStorage.setItem('playerScoreTrackerState', stateString);
+        }
+
+        // Load state from browser storage
+        function loadState() {
+            const savedStateString = localStorage.getItem('playerScoreTrackerState');
+            if (savedStateString) {
+                try {
+                    const savedState = JSON.parse(savedStateString);
+                    
+                    // Load saved data
+                    if (savedState.currentSessionId) state.currentSessionId = savedState.currentSessionId;
+                    if (savedState.sessions) state.sessions = savedState.sessions;
+                    if (savedState.gameHistory) state.gameHistory = savedState.gameHistory;
+                    if (savedState.globalSettings) {
+                        state.globalSettings = { ...state.globalSettings, ...savedState.globalSettings };
+                    }
+                    
+                    // Ensure all players have colors (for backward compatibility)
+                    Object.values(state.sessions).forEach(session => {
+                        session.players.forEach((player, index) => {
+                            if (!player.color) {
+                                player.color = defaultColors[index % defaultColors.length];
+                            }
+                        });
+                    });
+                    
+                    // Clean up invalid current session
+                    if (state.currentSessionId && !state.sessions[state.currentSessionId]) {
+                        state.currentSessionId = null;
+                    }
+                } catch (e) {
+                    console.error('Error loading saved state:', e);
+                }
+            }
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            setupPWA();
+        });
+
+        // Enhanced PWA setup
+        function setupPWA() {
+            // Create and inject manifest
+            const manifest = {
+                "name": "Player Score Tracker",
+                "short_name": "ScoreTracker",
+                "description": "Track scores across multiple game sessions",
+                "start_url": ".",
+                "display": "standalone",
+                "orientation": "portrait",
+                "background_color": "#1a1a2e",
+                "theme_color": "#4cc9f0",
+                "scope": "/",
+                "icons": [
+                    {
+                        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAOeSURBVHic7d1BbttAEEVR8gIyS+8/W++gWXgBARZgwbJsSTOvqlsFqAFJ/J/mBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAOeSURBVHic7d1BbttAEEVR8gIyS+8/W++gWXgBARZgwbJsSTOvqlsFqAFJ/J/mBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                        "sizes": "512x512", 
+                        "type": "image/png"
+                    }
+                ]
+            };
+
+            // Create blob URL for manifest
+            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            
+            // Add manifest link
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestURL;
+            document.head.appendChild(link);
+
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                // Simple service worker as data URL
+                const swCode = `
+                    const CACHE_NAME = 'score-tracker-v1';
+                    
+                    self.addEventListener('install', event => {
+                        console.log('Service worker installing...');
+                        self.skipWaiting();
+                    });
+                    
+                    self.addEventListener('activate', event => {
+                        console.log('Service worker activating...');
+                        event.waitUntil(self.clients.claim());
+                    });
+                    
+                    self.addEventListener('fetch', event => {
+                        if (event.request.url.startsWith('chrome-extension://')) {
+                            return;
+                        }
+                        event.respondWith(
+                            caches.match(event.request).then(response => {
+                                return response || fetch(event.request);
+                            })
+                        );
+                    });
+                `;
+                
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swURL = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swURL)
+                    .then(registration => {
+                        console.log('SW registered successfully');
+                        
+                        // Check if we can show install prompt
+                        window.addEventListener('beforeinstallprompt', (e) => {
+                            e.preventDefault();
+                            window.deferredPrompt = e;
+                            showInstallButton();
+                        });
+                    })
+                    .catch(error => {
+                        console.log('SW registration failed');
+                    });
+            }
+        }
+
+        // Show install button if PWA can be installed
+        function showInstallButton() {
+            // Add install button to the start page
+            const startPage = document.getElementById('start-page');
+            const existingInstallBtn = document.getElementById('install-btn');
+            
+            if (!existingInstallBtn) {
+                const installBtn = document.createElement('button');
+                installBtn.id = 'install-btn';
+                installBtn.className = 'btn';
+                installBtn.style.marginTop = '20px';
+                installBtn.textContent = 'Install App';
+                installBtn.addEventListener('click', installApp);
+                startPage.appendChild(installBtn);
+            }
+        }
+
+        // Install the PWA
+        function installApp() {
+            const promptEvent = window.deferredPrompt;
+            if (promptEvent) {
+                promptEvent.prompt();
+                promptEvent.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        document.getElementById('install-btn').style.display = 'none';
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    window.deferredPrompt = null;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
